@@ -3,22 +3,21 @@ const posts = require('../data/posts.js');
 
 // importare mysql 
 const mysql = require('../data/db.js');
+// importare connection
+const connection = require('../data/db.js');
 
 // funzioni operazioni CRUD
 
 function index(req, res) {
-    // console.log(req.query);
-    // giorgia.get(); => generare error 500 "giorgia is non defined"
-    const tag = req.query.tag;
-    let filteredPosts = posts;
 
-    // se la richiesta contiene un filtro, filtrare i post
-    if (tag) {
-        filteredPosts = posts.filter(post => post.tags.includes(tag));
-    }
+    // salvare in una variabile la query da utilizzare
+    const sql = 'SELECT * FROM posts';
 
-    // restituire i post filtrati o i post originari
-    res.json(filteredPosts);
+    // eseguire la query
+    connection.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        res.json(results);
+    })
 }
 
 function show(req, res) {
