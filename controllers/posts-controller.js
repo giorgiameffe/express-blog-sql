@@ -13,7 +13,7 @@ function index(req, res) {
     // salvare in una variabile la query da utilizzare
     const sql = 'SELECT * FROM posts';
 
-    // eseguire la query
+    // eseguire la query per mostrare i post
     connection.query(sql, (err, results) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.json(results);
@@ -129,24 +129,18 @@ function modify(req, res) {
 
 function destroy(req, res) {
 
+    // recuperare id dall'URL
     const id = parseInt(req.params.id);
-    // cercare indice del post
-    const post = posts.findIndex(post => post.id === id);
 
-    // controllare che esista il post in base all'indice
-    if (post < 0) {
+    // salvare in una variabile la query da utilizzare
+    const sql = 'DELETE FROM posts WHERE id = ?';
 
-        return res.status(404).json({
-            status: 404,
-            error: 'Not Found',
-            message: 'Post non trovato'
-        })
-    }
+    // eseguire la query per eliminare il post
+    connection.query(sql, [id], (err) => {
+        if (err) return res.status(500).json({ error: 'Eliminazione del post non avvenuta' });
+        res.sendStatus(204);
+    })
 
-    posts.splice(post, 1);
-    console.log(posts);
-    // informare il client che la cancellazione è andata a buon fine
-    res.sendStatus(204);
 }
 
 // esportazione 
