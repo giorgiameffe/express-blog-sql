@@ -26,13 +26,31 @@ function show(req, res) {
     const id = parseInt(req.params.id);
 
     // salvare in una variabile la query da utilizzare
-    const sql = 'SELECT * FROM posts WHERE id = ?';
+    const postSql = 'SELECT * FROM posts WHERE id = ?';
+
+    const tagsSql = `
+    SELECT *
+    FROM tags
+    JOIN post_tag ON post_tag.tag_id = tags.id
+    WHERE post_id = ?
+    `;
 
     // eseguire la query per mostrare il singolo post
-    connection.query(sql, [id], (err, results) => {
+    connection.query(postSql, [id], (err, postResults) => {
         if (err) return res.status(500).json({ error: 'Database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'Post non trovato' });
-        res.json(results[0]);
+        if (postResults.length === 0) return res.status(404).json({ error: 'Post non trovato' });
+
+        // recuperare il post
+        const post = postResults[0];
+
+        // eseguire query per i tags
+        connection.query(tagsSql, [id], (err, tagsResults) => {
+            if (err) return res.status(500).json({ error: 'Database error' });
+
+            // aggiungere tags al post manipolando i tag in modo da avere un array di stringhe
+            post.tags = tagsResults.map(tag => tag.label);
+            res.json(post);
+        })
     })
 }
 
