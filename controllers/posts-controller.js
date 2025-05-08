@@ -22,21 +22,18 @@ function index(req, res) {
 
 function show(req, res) {
 
+    // recuperare id
     const id = parseInt(req.params.id);
-    // cercare il post tramite l'id
-    const post = posts.find(post => post.id === id);
 
-    // controllare che esista il post con l'id inserito
-    if (!post) {
+    // salvare in una variabile la query da utilizzare
+    const sql = 'SELECT * FROM posts WHERE id = ?';
 
-        return res.status(404).json({
-            status: 404,
-            error: 'Not Found',
-            message: 'Post non trovato'
-        })
-    }
-    // restituire il post in formato JSON
-    res.json(post);
+    // eseguire la query per mostrare il singolo post
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (results.length === 0) return res.status(404).json({ error: 'Post non trovato' });
+        res.json(results[0]);
+    })
 }
 
 function store(req, res) {
